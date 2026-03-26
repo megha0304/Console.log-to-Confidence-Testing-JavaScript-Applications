@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="ICICI Bank Transaction Testing Application"
+    />
+    <title>ICICI Bank - Transaction Testing</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
+
+		<style>
+			.reveal code {
+				font-size: 0.8em;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>From Console.log to Confidence</h1>
+					<h2>Testing JavaScript Applications</h2>
+					<p>A Case Study on ICICI Bank Transactions</p>
+					<p>Presented by: [Your Name]</p>
+					<p>Date: March 26, 2026</p>
+				</section>
+
+				<section>
+					<h2>Introduction</h2>
+					<p>Many developers start debugging with console logs, but scalable applications demand structured testing strategies.</p>
+					<p>This session introduces modern JavaScript testing techniques—from unit tests to end-to-end automation.</p>
+					<p>We’ll explore how tools like Jest and React Testing Library can help developers write reliable tests and improve code quality.</p>
+					<p>By the end of the talk, participants will understand how testing improves developer productivity and software reliability.</p>
+				</section>
+
+				<section>
+					<h2>Agenda</h2>
+					<ul>
+						<li>Why Testing Matters</li>
+						<li>Testing Types</li>
+						<li>Tools: Jest and React Testing Library</li>
+						<li>Case Study: ICICI Bank Transaction</li>
+						<li>Demo</li>
+						<li>Conclusion</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Why Testing Matters</h2>
+					<ul>
+						<li>Improves code quality by catching bugs early</li>
+						<li>Increases developer confidence in code changes</li>
+						<li>Facilitates safe refactoring</li>
+						<li>Essential for scalable applications</li>
+						<li>Reduces time spent on debugging</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Testing Types</h2>
+					<ul>
+						<li><strong>Unit Tests:</strong> Test individual functions or components in isolation</li>
+						<li><strong>Integration Tests:</strong> Test interactions between multiple components</li>
+						<li><strong>End-to-End Tests:</strong> Test the entire application flow from user perspective</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Tools Overview</h2>
+					<ul>
+						<li><strong>Jest:</strong> A JavaScript testing framework developed by Facebook. Great for unit and integration tests with built-in mocking and assertion library.</li>
+						<li><strong>React Testing Library:</strong> A testing utility for React that encourages testing components from the user's perspective, not implementation details.</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Case Study: ICICI Bank Transaction</h2>
+					<p><strong>Scenario:</strong> Fund Transfer Transaction</p>
+					<ul>
+						<li>User logs into ICICI Bank app/website</li>
+						<li>Selects "Transfer Funds" option</li>
+						<li>Chooses recipient account</li>
+						<li>Enters transfer amount</li>
+						<li>Reviews and confirms the transaction</li>
+						<li>System processes the transaction and shows result</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Unit Testing with Jest</h2>
+					<p>Example: Testing transaction validation logic</p>
+					<pre><code class="javascript">// validateTransaction.js
+function validateTransaction(amount, balance) {
+  if (amount <= 0) return false;
+  if (amount > balance) return false;
+  return true;
+}
+
+module.exports = validateTransaction;
+</code></pre>
+					<pre><code class="javascript">// validateTransaction.test.js
+const validateTransaction = require('./validateTransaction');
+
+describe('validateTransaction', () => {
+  it('should return false for negative amount', () => {
+    expect(validateTransaction(-100, 1000)).toBe(false);
+  });
+
+  it('should return false for amount exceeding balance', () => {
+    expect(validateTransaction(1500, 1000)).toBe(false);
+  });
+
+  it('should return true for valid amount', () => {
+    expect(validateTransaction(500, 1000)).toBe(true);
+  });
+});
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Testing React Components with React Testing Library</h2>
+					<p>Example: Testing the Amount Input Component</p>
+					<pre><code class="javascript">// AmountInput.js
+import React from 'react';
+
+function AmountInput({ value, onChange }) {
+  return (
+    &lt;label&gt;
+      Transfer Amount:
+      &lt;input
+        type="number"
+        value={value}
+        onChange={onChange}
+        min="0"
+      /&gt;
+    &lt;/label&gt;
+  );
+}
+
+export default AmountInput;
+</code></pre>
+					<pre><code class="javascript">// AmountInput.test.js
+import { render, screen, fireEvent } from '@testing-library/react';
+import AmountInput from './AmountInput';
+
+test('renders amount input with label', () => {
+  render(&lt;AmountInput value="" onChange={() => {}} /&gt;);
+  const input = screen.getByLabelText(/transfer amount/i);
+  expect(input).toBeInTheDocument();
+});
+
+test('calls onChange when input value changes', () => {
+  const handleChange = jest.fn();
+  render(&lt;AmountInput value="" onChange={handleChange} /&gt;);
+  const input = screen.getByLabelText(/transfer amount/i);
+  fireEvent.change(input, { target: { value: '500' } });
+  expect(handleChange).toHaveBeenCalledTimes(1);
+});
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Integration Testing</h2>
+					<p>Testing the complete transaction flow with mocked dependencies.</p>
+					<p>Example: Testing the transfer process that combines validation and API call.</p>
+					<pre><code class="javascript">// transferService.js
+const validateTransaction = require('./validateTransaction');
+
+async function processTransfer(amount, balance, recipientId) {
+  if (!validateTransaction(amount, balance)) {
+    throw new Error('Invalid transaction');
+  }
+  // Mock API call
+  const response = await fetch('/api/transfer', {
+    method: 'POST',
+    body: JSON.stringify({ amount, recipientId })
+  });
+  return response.json();
+}
+
+module.exports = processTransfer;
+</code></pre>
+					<p>Use Jest to mock the fetch and test the integration.</p>
+				</section>
+
+				<section>
+					<h2>End-to-End Testing</h2>
+					<p>While Jest and React Testing Library cover unit and component testing, for full e2e automation, tools like Cypress or Playwright can be used.</p>
+					<p>Example: Automating the login and transfer flow in a browser.</p>
+					<p>This ensures the entire user journey works as expected.</p>
+				</section>
+
+				<section>
+					<h2>Demo</h2>
+					<p>Running the tests we created.</p>
+					<p>Show Jest running unit tests.</p>
+					<p>Show React Testing Library tests for components.</p>
+					<p>Demonstrate how tests provide confidence in the transaction functionality.</p>
+				</section>
+
+				<section>
+					<h2>Conclusion</h2>
+					<ul>
+						<li>Testing transforms debugging from reactive console.log to proactive confidence</li>
+						<li>Start with unit tests using Jest for core logic</li>
+						<li>Use React Testing Library for user-focused component testing</li>
+						<li>Build comprehensive test suites to ensure reliability</li>
+						<li>Testing improves developer productivity and software quality</li>
+					</ul>
+					<p>Thank you!</p>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+		<script>
+			Reveal.initialize({
+				hash: true,
+				plugins: [ RevealHighlight ]
+			});
+		</script>
+	</body>
+</html>
